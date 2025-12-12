@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<clinic>
+    <patient name="Nasheh" patientid="07" birthdate="15-03-1985" gender="male" phone="08123456789">
+        <episode episodeid="01" date="21-12-2025" diagnosis="Appendicitis Akut" doctor="Dr. Sari Wahyuni">
+            <stage name="admission" date="21-12-2025" time="21:00" ward="IGD" status="completed">
+                <data type="pdf" name="Surat Rujukan" url="www.hospital.com/data/07/rujukan.pdf" date="21-12-2025" time="20:30" size="245KB"></data>
+                <data type="pdf" name="Formulir Konsen Tindakan" url="www.hospital.com/data/07/konsen_tindakan.pdf" date="21-12-2025" time="21:15" size="180KB"></data>
+                <data type="jpg" name="Foto Identifikasi" url="www.hospital.com/data/07/identifikasi.jpg" date="21-12-2025" time="21:05" size="850KB"></data>
+                <data type="pdf" name="Riwayat Medis Awal" url="www.hospital.com/data/07/riwayat_medis.pdf" date="21-12-2025" time="21:20" size="320KB"></data>
+            </stage>
+            <stage name="ward" date="21-12-2025" time="22:30" ward="Bougenville 301" status="completed">
+                <data type="pdf" name="Hasil Laboratorium Darah" url="www.hospital.com/data/07/lab_darah.pdf" date="22-12-2025" time="08:15" size="410KB"></data>
+                <data type="jpg" name="USG Abdomen" url="www.hospital.com/data/07/usg_abdomen.jpg" date="22-12-2025" time="09:45" size="2.1MB"></data>
+                <data type="pdf" name="Laporan Observasi 6 Jam" url="www.hospital.com/data/07/observasi_6jam.pdf" date="22-12-2025" time="04:00" size="190KB"></data>
+                <data type="pdf" name="Resep Obat Pra-Operasi" url="www.hospital.com/data/07/resep_praop.pdf" date="22-12-2025" time="10:30" size="155KB"></data>
+            </stage>
+            <stage name="operation" date="22-12-2025" time="13:00" operation_type="Appendectomy" surgeon="Dr. Rizky Pratama" status="completed">
+                <data type="pdf" name="Laporan Anestesi" url="www.hospital.com/data/07/anestesi.pdf" date="22-12-2025" time="14:30" size="275KB"></data>
+                <data type="pdf" name="Laporan Operasi" url="www.hospital.com/data/07/laporan_operasi.pdf" date="22-12-2025" time="15:45" size="380KB"></data>
+                <data type="jpg" name="Foto Intraoperatif" url="www.hospital.com/data/07/foto_intraop.jpg" date="22-12-2025" time="14:00" size="1.8MB"></data>
+                <data type="pdf" name="Checklist Safety" url="www.hospital.com/data/07/checklist_safety.pdf" date="22-12-2025" time="12:45" size="120KB"></data>
+            </stage>
+            <stage name="recovery" date="22-12-2025" time="16:00" ward="Pulih Sadar" status="completed">
+                <data type="pdf" name="Laporan Pemulihan" url="www.hospital.com/data/07/pemulihan.pdf" date="22-12-2025" time="18:30" size="210KB"></data>
+                <data type="pdf" name="Monitoring Vital Signs" url="www.hospital.com/data/07/monitoring_vital.pdf" date="22-12-2025" time="17:45" size="195KB"></data>
+            </stage>
+            <stage name="postoperative" date="22-12-2025" time="19:00" ward="Bougenville 301" status="active">
+                <data type="pdf" name="Instruksi Perawatan Pasca Operasi" url="www.hospital.com/data/07/perawatan_pascaop.pdf" date="22-12-2025" time="20:15" size="225KB"></data>
+                <data type="pdf" name="Resep Obat Pasca Operasi" url="www.hospital.com/data/07/resep_pascaop.pdf" date="23-12-2025" time="08:00" size="165KB"></data>
+                <data type="pdf" name="Jadwal Visit Dokter" url="www.hospital.com/data/07/jadwal_visit.pdf" date="23-12-2025" time="09:30" size="95KB"></data>
+            </stage>
+        </episode>
+    </patient>
+</clinic>

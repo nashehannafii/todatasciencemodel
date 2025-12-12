@@ -1,0 +1,77 @@
+{
+  "_id": "patient_07",
+  "name": "Nasheh",
+  "patientId": "07",
+  "birthDate": "1985-03-15",
+  "gender": "male",
+  "phone": "08123456789",
+  "episodes": [
+    {
+      "episodeId": "01",
+      "date": "2025-12-21",
+      "diagnosis": "Appendicitis Akut",
+      "doctor": "Dr. Sari Wahyuni",
+      "stages": [
+        {
+          "id": "01"
+          "name": "admission",
+          "date": "2025-12-21",
+          "time": "21:00",
+          "ward": "IGD",
+          "status": "completed",
+          "files": [
+            { 
+                "fileId": "f_rujukan",
+                "fileType": "pdf",
+                "fileSize": "1020",
+                "data": {
+                    "binary": {
+                        "base64": "...",
+                        "subType": ""
+                    }
+                }
+            },
+            { "fileId": "f_konsen" },
+            { "fileId": "f_identifikasi" },
+            { "fileId": "f_riwayat" }
+          ]
+        },
+        {
+          "id": "02"
+          "name": "admission",
+          "date": "2025-12-21",
+          "time": "21:00",
+          "ward": "IGD",
+          "status": "completed",
+          "files": [
+            { "fileId": "f_rujukan" },
+            { "fileId": "f_konsen" },
+            { "fileId": "f_identifikasi" },
+            { "fileId": "f_riwayat" }
+          ]
+        }
+      ]
+    },
+    {
+      "episodeId": "02",
+      "date": "2025-12-21",
+      "diagnosis": "Appendicitis Akut",
+      "doctor": "Dr. Sari Wahyuni",
+      "stages": [
+        {
+          "name": "admission",
+          "date": "2025-12-21",
+          "time": "21:00",
+          "ward": "IGD",
+          "status": "completed",
+          "files": [
+            { "fileId": "f_rujukan" },
+            { "fileId": "f_konsen" },
+            { "fileId": "f_identifikasi" },
+            { "fileId": "f_riwayat" }
+          ]
+        }
+      ]
+    }
+  ]
+}

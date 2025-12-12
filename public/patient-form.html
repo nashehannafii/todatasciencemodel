@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Form Input Pasien</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 24px; }
+    form { max-width: 720px; display: grid; gap: 12px; }
+    fieldset { border: 1px solid #ddd; padding: 12px; }
+    label { display: block; font-weight: 600; margin-bottom: 4px; }
+    input, select, textarea { width: 100%; padding: 8px; box-sizing: border-box; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    button { padding: 10px 16px; }
+    .success { color: #0a7; }
+    .error { color: #c00; }
+  </style>
+</head>
+<body>
+  <h1>Input Data Pasien</h1>
+  <p>Isi data pasien berikut dan klik Simpan.</p>
+
+  <form id="patientForm">
+    <div class="row">
+      <div>
+        <label for="name">Nama</label>
+        <input id="name" name="name" required />
+      </div>
+      <div>
+        <label for="patientId">ID Pasien</label>
+        <input id="patientId" name="patientId" required />
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label for="birthDate">Tanggal Lahir (YYYY-MM-DD)</label>
+        <input id="birthDate" name="birthDate" placeholder="1990-01-31" required />
+      </div>
+      <div>
+        <label for="gender">Jenis Kelamin</label>
+        <select id="gender" name="gender" required>
+          <option value="">-- pilih --</option>
+          <option value="male">Pria</option>
+          <option value="female">Wanita</option>
+          <option value="other">Lainnya</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label for="phone">No. Telepon</label>
+        <input id="phone" name="phone" required />
+      </div>
+      <div>
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" />
+      </div>
+    </div>
+
+    <div>
+      <label for="address">Alamat</label>
+      <textarea id="address" name="address" rows="2"></textarea>
+    </div>
+
+    <fieldset>
+      <legend>Kontak Darurat (opsional)</legend>
+      <div class="row">
+        <div>
+          <label for="emergencyContactName">Nama</label>
+          <input id="emergencyContactName" name="emergencyContactName" />
+        </div>
+        <div>
+          <label for="emergencyContactPhone">Telepon</label>
+          <input id="emergencyContactPhone" name="emergencyContactPhone" />
+        </div>
+      </div>
+      <div>
+        <label for="emergencyContactRelationship">Hubungan</label>
+        <input id="emergencyContactRelationship" name="emergencyContactRelationship" />
+      </div>
+    </fieldset>
+
+    <button type="submit">Simpan</button>
+    <p id="message"></p>
+  </form>
+
+  <script>
+    const form = document.getElementById('patientForm');
+    const message = document.getElementById('message');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      message.textContent = '';
+      message.className = '';
+
+      const formData = new FormData(form);
+      const payload = Object.fromEntries(formData.entries());
+
+      try {
+        const res = await fetch('/patients', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (res.ok) {
+          message.textContent = 'Berhasil menyimpan pasien: ' + data.patient.name;
+          message.className = 'success';
+          form.reset();
+        } else {
+          message.textContent = data.error || 'Gagal menyimpan data';
+          message.className = 'error';
+        }
+      } catch (err) {
+        message.textContent = err.message || 'Kesalahan jaringan';
+        message.className = 'error';
+      }
+    });
+  </script>
+</body>
+</html>
