@@ -58,40 +58,63 @@ export class PatientController {
     try {
       const contentType = ctx.request.headers.get('content-type') || '';
       let payload: any;
+
       if (contentType.includes('application/json')) {
         payload = await ctx.request.json();
-      } else if (contentType.includes('application/x-www-form-urlencoded')) {
-        const formData = await ctx.request.formData();
-        payload = Object.fromEntries(Array.from(formData.entries()));
       } else {
-        const text = await ctx.request.text();
-        payload = text ? JSON.parse(text) : {};
+        payload = {};
       }
 
-      // Normalize episodes and inline base64 file data if present
-      const normalizeEpisodes = (episodes: any[] = []) => {
-        return episodes.map(ep => ({
-          ...ep,
-          stages: (ep.stages || []).map((st: any) => ({
-            ...st,
-            files: (st.files || []).map((f: any) => {
-              // Handle base64 payload: binaryData.data (base64 string) -> Binary
-              if (f?.binaryData?.data && typeof f.binaryData.data === 'string') {
+      const normalizeEpisodes = async (episodes: any[] = []) => {
+        const result: any[] = [];
+
+        for (const ep of episodes) {
+          const stages = [];
+
+          for (const st of ep.stages || []) {
+            const files = [];
+
+            for (const f of st.files || []) {
+              const binary = f.binaryData;
+
+              // Extract base64 from either new format or old format
+              const base64 =
+                typeof binary === 'string'
+                  ? binary
+                  : binary?.base64 || binary?.data;
+
+              if (base64) {
                 try {
-                  const buf = Buffer.from(f.binaryData.data, 'base64');
+                  const buffer = Buffer.from(base64, 'base64');
+
                   f.binaryData = await fileService.createBinaryData(
-                    buf,
-                    f.binaryData.contentType || f.fileType || 'application/octet-stream',
-                    f.binaryData.fileName || f.fileId || 'file'
+                    buffer,
+                    binary?.contentType || f.fileType || 'application/octet-stream',
+                    binary?.fileName || f.fileId || 'file'
                   );
-                } catch (e) {
-                  console.error('Failed to decode base64 file', e);
+
+                  f.fileSize = buffer.length;
+                } catch (err: any) {
+                  console.error(`Error processing file ${f.fileId}:`, err.message);
+                  throw new Error(`Failed to process file ${f.fileId}: ${err.message}`);
+                }
+              } else {
+                // Only include file if it has binary data
+                if (!f.binaryData) {
+                  continue; // Skip files without binary data
                 }
               }
-              return f;
-            })
-          }))
-        }));
+
+              files.push(f);
+            }
+
+            stages.push({ ...st, files });
+          }
+
+          result.push({ ...ep, stages });
+        }
+
+        return result;
       };
 
       const patientData = {
@@ -99,29 +122,22 @@ export class PatientController {
         patientId: payload.patientId,
         birthDate: payload.birthDate,
         gender: payload.gender,
-        phone: payload.phone,
-        email: payload.email || undefined,
-        address: payload.address || undefined,
-        emergencyContact: payload.emergencyContactName ? {
-          name: payload.emergencyContactName,
-          phone: payload.emergencyContactPhone,
-          relationship: payload.emergencyContactRelationship
-        } : undefined,
         episodes: await normalizeEpisodes(payload.episodes || [])
-      } as any;
+      };
 
       const created = await patientService.createPatient(patientData);
+
       return new Response(JSON.stringify({ success: true, patient: created }), {
         status: 201,
         headers: { 'Content-Type': 'application/json' }
       });
-    } catch (error: any) {
-      return new Response(JSON.stringify({ error: error.message }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
+    } catch (err: any) {
+      return new Response(JSON.stringify({ error: err.message }), {
+        status: 500
       });
     }
   }
+
   // Upload file endpoint
   static async uploadFile(ctx: Context) {
     try {

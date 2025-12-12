@@ -93,14 +93,16 @@ export class FileService {
   async createBinaryData(
     buffer: Buffer,
     contentType: string,
-    filename: string
+    filename: string,
+    base64String?: string
   ): Promise<any> {
     return {
       data: new Binary(buffer),
       contentType,
       fileName: filename,
       size: buffer.length,
-      uploadDate: new Date()
+      uploadDate: new Date(),
+      base64: base64String || undefined
     };
   }
 
