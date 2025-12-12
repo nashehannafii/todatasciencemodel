@@ -271,4 +271,17 @@ export class PatientService {
   }
 
   // ... methods lainnya tetap seperti sebelumnya
+
+  async listPatients(limit = 50): Promise<IPatient[]> {
+    const collection = getPatientsCollection();
+    const cursor = collection.find({}).sort({ updatedAt: -1 }).limit(limit);
+    const docs = await cursor.toArray();
+    return docs as unknown as IPatient[];
+  }
+
+  async getPatientById(patientId: string): Promise<IPatient | null> {
+    const collection = getPatientsCollection();
+    const doc = await collection.findOne({ patientId });
+    return (doc as unknown as IPatient) || null;
+  }
 }

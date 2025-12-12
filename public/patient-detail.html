@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Detail Pasien</title>
+  <style>
+    :root { 
+      --bg:#fafbfc; --card:#ffffff; --text:#1e293b; --text-muted:#64748b; 
+      --border:#e2e8f0; --accent:#4f46e5; --accent-hover:#4338ca;
+      --shadow: 0 1px 3px rgba(0,0,0,0.05); --shadow-lg: 0 4px 16px rgba(0,0,0,0.08);
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body {
+      min-height:100vh; background:var(--bg); color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif;
+      display:flex; justify-content:center; line-height:1.6;
+    }
+    .container { width:100%; max-width:1080px; padding:40px 24px; }
+    .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; }
+    .title { font-size:28px; font-weight:600; letter-spacing:-0.02em; }
+    .nav a { 
+      color:var(--accent); text-decoration:none; margin-left:16px; font-size:14px;
+      transition:color 0.2s;
+    }
+    .nav a:hover { color:var(--accent-hover); }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:32px; box-shadow:var(--shadow-lg); }
+    .grid { display:grid; gap:20px; }
+    .section { 
+      border:1px solid var(--border); border-radius:10px; padding:24px;
+      background:var(--card); box-shadow:var(--shadow);
+    }
+    .section strong { font-weight:600; color:var(--text); }
+    .small { color:var(--text-muted); font-size:13px; margin-top:6px; }
+    .episode { border-top:1px solid var(--border); margin-top:20px; padding-top:20px; }
+    .stage { border:1px solid var(--border); border-radius:8px; padding:16px; margin:12px 0; background:#f8fafc; }
+    .files { display:grid; gap:10px; margin-top:12px; }
+    .file { border:1px solid var(--border); border-radius:6px; padding:12px; background:white; }
+    .file a { color:var(--accent); text-decoration:none; font-size:13px; margin-right:12px; }
+    .file a:hover { text-decoration:underline; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="title">Detail Pasien</div>
+      <div class="nav"><a href="/">Beranda</a> • <a href="/patients-view">Data Pasien</a></div>
+    </div>
+    <div class="card">
+      <div id="basic" class="section"></div>
+      <div id="episodes" class="section"></div>
+    </div>
+  </div>
+  <script>
+    function getIdFromQuery(){
+      const u = new URL(location.href); return u.searchParams.get('id');
+    }
+    function fmtEmergency(ec){
+      if(!ec) return '-';
+      return `${ec.name||''} • ${ec.phone||''} • ${ec.relationship||''}`;
+    }
+    async function load(){
+      const id = getIdFromQuery();
+      if(!id){ document.getElementById('basic').innerHTML = '<div class="small">Parameter id tidak ada</div>'; return; }
+      const res = await fetch(`/patients/${encodeURIComponent(id)}`);
+      const data = await res.json();
+      if(!res.ok){ document.getElementById('basic').innerHTML = `<div class="small">Gagal memuat: ${data.error||'unknown'}</div>`; return; }
+      const p = data.patient;
+      document.title = `Detail Pasien • ${p.name}`;
+      document.getElementById('basic').innerHTML = `
+        <div><strong>${p.name}</strong> <span class="small">(${p.patientId})</span></div>
+        <div class="small">${p.gender} • ${p.birthDate} • ${p.phone}</div>
+        <div class="small">Email: ${p.email||'-'} • Alamat: ${p.address||'-'}</div>
+        <div class="small">Kontak Darurat: ${fmtEmergency(p.emergencyContact)}</div>
+        <div class="small">Dibuat: ${p.createdAt ? new Date(p.createdAt).toLocaleString() : '-'}</div>
+        <div class="small">Diubah: ${p.updatedAt ? new Date(p.updatedAt).toLocaleString() : '-'}</div>
+      `;
+      const epWrap = document.getElementById('episodes');
+      epWrap.innerHTML = '<strong>Episode</strong>';
+      (p.episodes||[]).forEach(ep=>{
+        const epEl = document.createElement('div');
+        epEl.className='episode';
+        epEl.innerHTML = `
+          <div><strong>${ep.episodeId}</strong> • ${ep.date}</div>
+          <div class="small">${ep.diagnosis} • ${ep.doctor}</div>
+          <div class="small">Dibuat: ${ep.createdAt ? new Date(ep.createdAt).toLocaleString() : '-'} • Diubah: ${ep.updatedAt ? new Date(ep.updatedAt).toLocaleString() : '-'}</div>
+          <div class="stages"></div>
+        `;
+        const stList = epEl.querySelector('.stages');
+        (ep.stages||[]).forEach(st=>{
+          const stEl = document.createElement('div');
+          stEl.className='stage';
+          stEl.innerHTML = `
+            <div><strong>${st.name}</strong> • ${st.date} ${st.time} • ${st.ward} • ${st.status}</div>
+            <div class="files"></div>
+          `;
+          const files = stEl.querySelector('.files');
+          (st.files||[]).forEach(f=>{
+            const fileEl = document.createElement('div');
+            fileEl.className='file';
+            const viewUrl = f.fileId ? `/patients/${p.patientId}/episodes/${ep.episodeId}/stages/${st.id||''}/files/${f.fileId}` : '#';
+            fileEl.innerHTML = `
+              <div><strong>File:</strong> ${f.fileId} <span class="small">${(f.metadata?.description)||''}</span></div>
+              <div class="small">${(f.binaryData?.fileName)||''} • ${(f.binaryData?.contentType)||''} • ${(f.binaryData?.size)||''}</div>
+              <div class="small"><a href="${viewUrl}" target="_blank">Lihat</a> • <a href="${viewUrl}/download" target="_blank">Unduh</a></div>
+            `;
+            files.appendChild(fileEl);
+          });
+          stList.appendChild(stEl);
+        });
+        epWrap.appendChild(epEl);
+      });
+    }
+    load().catch(err=>{
+      document.getElementById('basic').innerHTML = `<div class="small">Gagal memuat: ${err?.message||err}</div>`
+    });
+  </script>
+</body>
+</html>

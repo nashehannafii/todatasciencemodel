@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Data Pasien</title>
+  <style>
+    :root {
+      --bg: #fafbfc; --card:#ffffff; --text:#1e293b; --text-muted:#64748b; 
+      --border:#e2e8f0; --accent:#4f46e5; --accent-hover:#4338ca;
+      --shadow: 0 1px 3px rgba(0,0,0,0.05); --shadow-lg: 0 4px 16px rgba(0,0,0,0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height:100vh; background:var(--bg); color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif;
+      display:flex; justify-content:center; line-height:1.6;
+    }
+    .container { width:100%; max-width:1080px; padding:40px 24px; }
+    .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; }
+    .title { font-size:28px; font-weight:600; letter-spacing:-0.02em; }
+    .nav a { 
+      color:var(--accent); text-decoration:none; margin-left:16px; font-size:14px;
+      transition:color 0.2s;
+    }
+    .nav a:hover { color:var(--accent-hover); }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:32px; box-shadow:var(--shadow-lg); }
+    .grid { display:grid; gap:16px; }
+    .patient { 
+      border:1px solid var(--border); border-radius:10px; padding:20px;
+      background:var(--card); transition:all 0.2s; box-shadow:var(--shadow);
+    }
+    .patient:hover { box-shadow:var(--shadow-lg); transform:translateY(-2px); }
+    .small { color:var(--text-muted); font-size:13px; margin-top:4px; }
+    .episode { border-top:1px solid var(--border); margin-top:16px; padding-top:16px; }
+    .stage { border:1px solid var(--border); border-radius:8px; padding:12px; margin:12px 0; background:#f8fafc; }
+    .files { display:grid; gap:8px; margin-top:8px; }
+    .file { border:1px solid var(--border); border-radius:6px; padding:10px; background:white; }
+    .file a { color:var(--accent); text-decoration:none; font-size:13px; margin-right:12px; }
+    .file a:hover { text-decoration:underline; }
+    .actions { display:flex; gap:12px; margin-bottom:20px; }
+    .btn { 
+      padding:11px 20px; border-radius:8px; text-decoration:none; font-weight:500;
+      font-size:15px; transition:all 0.2s; display:inline-flex; align-items:center;
+    }
+    .btn-primary { background:var(--accent); color:white; box-shadow:var(--shadow); }
+    .btn-primary:hover { background:var(--accent-hover); transform:translateY(-1px); box-shadow:0 4px 12px rgba(79,70,229,0.3); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="title">Data Pasien</div>
+      <div class="nav"><a href="/">Beranda</a> • <a href="/patient-form">Input Pasien</a></div>
+    </div>
+    <div class="card">
+      <div class="actions">
+        <a class="btn btn-primary" href="/patient-form">+ Tambah Pasien</a>
+      </div>
+      <div id="list" class="grid"></div>
+    </div>
+  </div>
+  <script>
+    async function loadPatients(){
+      const res = await fetch('/patients?limit=100');
+      const data = await res.json();
+      const list = document.getElementById('list');
+      list.innerHTML = '';
+      (data.patients||[]).forEach(p=>{
+        const el = document.createElement('div');
+        el.className='patient';
+        el.innerHTML = `
+          <div><strong>${p.name}</strong> <span class="small">(${p.patientId})</span></div>
+          <div class="small">${p.gender} • ${p.birthDate} • ${p.phone}</div>
+          <div class="episode-list"></div>
+        `;
+        const epList = el.querySelector('.episode-list');
+        (p.episodes||[]).forEach(ep=>{
+          const epEl = document.createElement('div');
+          epEl.className='episode';
+          epEl.innerHTML = `
+            <div><strong>Episode:</strong> ${ep.episodeId} • ${ep.date}</div>
+            <div class="small">${ep.diagnosis} • ${ep.doctor}</div>
+            <div class="stages"></div>
+          `;
+          const stList = epEl.querySelector('.stages');
+          (ep.stages||[]).forEach(st=>{
+            const stEl = document.createElement('div');
+            stEl.className='stage';
+            stEl.innerHTML = `
+              <div><strong>${st.name}</strong> • ${st.date} ${st.time} • ${st.ward} • ${st.status}</div>
+              <div class="files"></div>
+            `;
+            const files = stEl.querySelector('.files');
+            (st.files||[]).forEach(f=>{
+              const fileEl = document.createElement('div');
+              fileEl.className='file';
+              const viewUrl = f.fileId ? `/patients/${p.patientId}/episodes/${ep.episodeId}/stages/${st.id||''}/files/${f.fileId}` : '#';
+              fileEl.innerHTML = `
+                <div><strong>File:</strong> ${f.fileId} <span class="small">${(f.metadata?.description)||''}</span></div>
+                <div class="small">${(f.binaryData?.fileName)||''} • ${(f.binaryData?.contentType)||''} • ${(f.binaryData?.size)||''}</div>
+                <div class="small"><a href="${viewUrl}" target="_blank">Lihat</a> • <a href="${viewUrl}/download" target="_blank">Unduh</a></div>
+              `;
+              files.appendChild(fileEl);
+            });
+            stList.appendChild(stEl);
+          });
+          epList.appendChild(epEl);
+        });
+        list.appendChild(el);
+      });
+    }
+    loadPatients().catch(err=>{
+      document.getElementById('list').innerHTML = `<div class="small">Gagal memuat: ${err?.message||err}</div>`
+    });
+  </script>
+</body>
+</html>

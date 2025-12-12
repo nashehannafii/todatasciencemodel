@@ -6,6 +6,53 @@ const patientService = new PatientService();
 const fileService = new FileService();
 
 export class PatientController {
+  // List patients
+  static async listPatients(ctx: Context) {
+    try {
+      const url = new URL(ctx.request.url);
+      const limitParam = url.searchParams.get('limit');
+      const limit = limitParam ? Math.min(200, Math.max(1, parseInt(limitParam))) : 50;
+      const patients = await patientService.listPatients(limit);
+      return new Response(JSON.stringify({ patients }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    } catch (error: any) {
+      return new Response(JSON.stringify({ error: error.message }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+  }
+
+  // Get patient detail
+  static async getPatient(ctx: Context) {
+    try {
+      const { patientId } = (ctx.params as any) || {};
+      if (!patientId) {
+        return new Response(JSON.stringify({ error: 'patientId required' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      const patient = await patientService.getPatientById(patientId);
+      if (!patient) {
+        return new Response(JSON.stringify({ error: 'Not Found' }), {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      return new Response(JSON.stringify({ patient }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    } catch (error: any) {
+      return new Response(JSON.stringify({ error: error.message }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+  }
   // Create patient endpoint
   static async createPatient(ctx: Context) {
     try {

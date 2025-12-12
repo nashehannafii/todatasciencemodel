@@ -5,22 +5,106 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Form Input Pasien</title>
   <style>
-    body { font-family: system-ui, sans-serif; margin: 24px; }
-    form { max-width: 720px; display: grid; gap: 12px; }
-    fieldset { border: 1px solid #ddd; padding: 12px; }
-    label { display: block; font-weight: 600; margin-bottom: 4px; }
-    input, select, textarea { width: 100%; padding: 8px; box-sizing: border-box; }
-    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    button { padding: 10px 16px; }
-    .success { color: #0a7; }
-    .error { color: #c00; }
+    :root {
+      --bg: #fafbfc;
+      --card: #ffffff;
+      --accent: #4f46e5;
+      --accent-hover: #4338ca;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --danger: #ef4444;
+      --success: #10b981;
+      --border: #e2e8f0;
+      --input-border: #cbd5e1;
+      --shadow: 0 1px 3px rgba(0,0,0,0.05);
+      --shadow-lg: 0 4px 16px rgba(0,0,0,0.08);
+      --fieldset-bg: #f8fafc;
+    }
+    :root.dark {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --accent: #6366f1;
+      --accent-hover: #818cf8;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --danger: #f87171;
+      --success: #34d399;
+      --border: #334155;
+      --input-border: #475569;
+      --shadow: 0 1px 3px rgba(0,0,0,0.3);
+      --shadow-lg: 0 4px 16px rgba(0,0,0,0.4);
+      --fieldset-bg: #0f172a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      margin: 0; background: var(--bg); color: var(--text);
+      min-height: 100vh; display: flex; align-items: flex-start; justify-content: center;
+      line-height: 1.6;
+    }
+    .container { width: 100%; max-width: 820px; padding: 40px 24px; }
+    .header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;
+    }
+    .title { font-size: 28px; font-weight: 600; letter-spacing: -0.02em; }
+    .nav a { color: var(--accent); text-decoration: none; margin-left: 16px; font-size: 14px; transition: color 0.2s; }
+    .nav a:hover { color: var(--accent-hover); }
+    .toggle { 
+      cursor: pointer; color: var(--text-muted); margin-left: 16px; font-size: 14px;
+      padding: 6px 12px; border-radius: 6px; transition: all 0.2s;
+      border: 1px solid var(--border);
+    }
+    .toggle:hover { background: var(--accent); color: white; border-color: var(--accent); }
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 32px; box-shadow: var(--shadow-lg);
+    }
+    form { display: grid; gap: 20px; }
+    fieldset {
+      border: 1px solid var(--border); border-radius: 10px; 
+      padding: 20px; background: var(--fieldset-bg);
+    }
+    legend { color: var(--text-muted); padding: 0 8px; font-weight: 500; font-size: 15px; }
+    label { display: block; font-weight: 500; margin-bottom: 6px; color: var(--text); font-size: 14px; }
+    input, select, textarea {
+      width: 100%; padding: 10px 14px; border-radius: 8px;
+      border: 1px solid var(--input-border); background: var(--card);
+      color: var(--text); outline: none; font-size: 15px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input:focus, select:focus, textarea:focus { 
+      border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,70,229,0.1); 
+    }
+    input::placeholder, textarea::placeholder { color: var(--text-muted); }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    button {
+      padding: 11px 20px; border-radius: 8px; border: none; cursor: pointer; 
+      font-weight: 500; font-size: 15px; transition: all 0.2s;
+    }
+    .btn-primary { background: var(--accent); color: white; box-shadow: var(--shadow); }
+    .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(79,70,229,0.3); }
+    .btn-secondary { background: var(--border); color: var(--text); }
+    .btn-secondary:hover { background: var(--input-border); }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-danger:hover { opacity: 0.9; }
+    .btn-link { background: transparent; color: var(--accent); text-decoration: none; border: 1px solid transparent; }
+    .btn-link:hover { text-decoration: underline; }
+    .actions { display: flex; gap: 12px; margin-top: 8px; }
+    .success { color: var(--success); font-weight: 500; margin-top: 8px; }
+    .error { color: var(--danger); font-weight: 500; margin-top: 8px; }
+    .stage, .file { border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin: 12px 0; }
   </style>
 </head>
 <body>
-  <h1>Input Data Pasien</h1>
-  <p>Isi data pasien berikut dan klik Simpan.</p>
+  <div class="container">
+    <div class="header">
+      <div class="title">Input Data Pasien</div>
+      <div class="nav"><a href="/">Beranda</a><span id="themeToggle" class="toggle">Tema: Cerah</span></div>
+    </div>
+    <div class="card">
+    <p>Isi data pasien berikut dan klik Simpan.</p>
 
-  <form id="patientForm">
+    <form id="patientForm">
     <div class="row">
       <div>
         <label for="name">Nama</label>
@@ -34,8 +118,8 @@
 
     <div class="row">
       <div>
-        <label for="birthDate">Tanggal Lahir (YYYY-MM-DD)</label>
-        <input id="birthDate" name="birthDate" placeholder="1990-01-31" required />
+        <label for="birthDate">Tanggal Lahir</label>
+        <input id="birthDate" name="birthDate" type="date" required />
       </div>
       <div>
         <label for="gender">Jenis Kelamin</label>
@@ -82,21 +166,300 @@
       </div>
     </fieldset>
 
-    <button type="submit">Simpan</button>
+    <fieldset>
+      <legend>Episode Perawatan</legend>
+      <div id="episodesContainer"></div>
+      <button type="button" id="addEpisodeBtn">+ Tambah Episode</button>
+    </fieldset>
+
+    <div class="actions">
+      <button type="submit" class="btn-primary">Simpan</button>
+      <a href="/" class="btn-link">Kembali ke Beranda</a>
+    </div>
     <p id="message"></p>
   </form>
+  </div>
+  </div>
 
   <script>
     const form = document.getElementById('patientForm');
     const message = document.getElementById('message');
 
+    const episodesContainer = document.getElementById('episodesContainer');
+    const addEpisodeBtn = document.getElementById('addEpisodeBtn');
+
+    function createStageElement(epIndex) {
+      const stage = document.createElement('div');
+      stage.className = 'stage';
+      stage.style.border = '1px dashed #ccc';
+      stage.style.padding = '8px';
+      stage.style.margin = '8px 0';
+
+      stage.innerHTML = `
+        <div class="row">
+          <div>
+            <label>Nama Stage</label>
+            <input name="episodes[${epIndex}].stages[].name" required />
+          </div>
+          <div>
+            <label>Tanggal (YYYY-MM-DD)</label>
+            <input name="episodes[${epIndex}].stages[].date" placeholder="2025-12-12" required />
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Waktu (HH:MM)</label>
+            <input name="episodes[${epIndex}].stages[].time" placeholder="09:30" required />
+          </div>
+          <div>
+            <label>Ruang Perawatan (Ward)</label>
+            <input name="episodes[${epIndex}].stages[].ward" required />
+          </div>
+        </div>
+        <div>
+          <label>Status</label>
+          <select name="episodes[${epIndex}].stages[].status" required>
+            <option value="">-- pilih --</option>
+            <option value="pending">Pending</option>
+            <option value="in-progress">Dalam proses</option>
+            <option value="completed">Selesai</option>
+            <option value="cancelled">Dibatalkan</option>
+          </select>
+        </div>
+        <div>
+          <label>Catatan (opsional)</label>
+          <textarea name="episodes[${epIndex}].stages[].notes" rows="2"></textarea>
+        </div>
+
+        <fieldset>
+          <legend>File di Stage</legend>
+          <div class="files"></div>
+          <button type="button" class="addFileBtn">+ Tambah File</button>
+        </fieldset>
+        <div style="text-align:right">
+          <button type="button" class="removeStageBtn">Hapus Stage</button>
+        </div>
+      `;
+
+      const filesContainer = stage.querySelector('.files');
+      const addFileBtn = stage.querySelector('.addFileBtn');
+      addFileBtn.addEventListener('click', () => {
+        const fileDiv = document.createElement('div');
+        fileDiv.className = 'file';
+        fileDiv.style.border = '1px dotted #ddd';
+        fileDiv.style.padding = '8px';
+        fileDiv.style.margin = '8px 0';
+        fileDiv.innerHTML = `
+          <div class="row">
+            <div>
+              <label>File ID / Referensi</label>
+              <input name="episodes[${epIndex}].stages[].files[].fileId" required />
+            </div>
+            <div>
+              <label>Jenis File (opsional)</label>
+              <input name="episodes[${epIndex}].stages[].files[].fileType" />
+            </div>
+          </div>
+          <div>
+            <label>Unggah File (pdf, jpg, png, dcm)</label>
+            <input type="file" class="fileUpload" accept=".pdf,.jpg,.jpeg,.png,.dcm" />
+            <small class="fileHint" style="color:#64748b">Opsional: jika diunggah, metadata disimpan; unggahan binary perlu endpoint khusus.</small>
+          </div>
+          <div class="row">
+            <div>
+              <label>Ukuran (opsional)</label>
+              <input name="episodes[${epIndex}].stages[].files[].fileSize" />
+            </div>
+            <div>
+              <label>Deskripsi (opsional)</label>
+              <input name="episodes[${epIndex}].stages[].files[].metadata.description" />
+            </div>
+          </div>
+          <div class="row">
+            <div>
+              <label>Tag (koma dipisah, opsional)</label>
+              <input name="episodes[${epIndex}].stages[].files[].metadata.tags" placeholder="ct: lab, radiologi" />
+            </div>
+            <div>
+              <label>Diunggah oleh (opsional)</label>
+              <input name="episodes[${epIndex}].stages[].files[].metadata.uploadedBy" />
+            </div>
+          </div>
+          <div style="text-align:right">
+            <button type="button" class="removeFileBtn">Hapus File</button>
+          </div>
+        `;
+        // Show selected file info in size/type
+        const uploadInput = fileDiv.querySelector('.fileUpload');
+        const sizeInput = fileDiv.querySelector(`input[name="episodes[${epIndex}].stages[].files[].fileSize"]`);
+        const typeInput = fileDiv.querySelector(`input[name="episodes[${epIndex}].stages[].files[].fileType"]`);
+        uploadInput.addEventListener('change', () => {
+          const f = uploadInput.files?.[0];
+          if (f) {
+            sizeInput.value = String(f.size);
+            typeInput.value = f.type || (f.name.endsWith('.dcm') ? 'application/dicom' : '');
+          }
+        });
+        fileDiv.querySelector('.removeFileBtn').addEventListener('click', () => fileDiv.remove());
+        filesContainer.appendChild(fileDiv);
+      });
+
+      stage.querySelector('.removeStageBtn').addEventListener('click', () => stage.remove());
+      return stage;
+    }
+
+    function createEpisodeElement(epIndex) {
+      const episode = document.createElement('fieldset');
+      episode.className = 'episode';
+      episode.style.border = '1px solid #bbb';
+      episode.style.margin = '12px 0';
+      episode.style.padding = '12px';
+      episode.innerHTML = `
+        <legend>Episode #${epIndex + 1}</legend>
+        <div class="row">
+          <div>
+            <label>Episode ID</label>
+            <input name="episodes[${epIndex}].episodeId" required />
+          </div>
+          <div>
+            <label>Tanggal (YYYY-MM-DD)</label>
+            <input name="episodes[${epIndex}].date" placeholder="2025-12-12" required />
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Diagnosis</label>
+            <input name="episodes[${epIndex}].diagnosis" required />
+          </div>
+          <div>
+            <label>Dokter Penanggung Jawab</label>
+            <input name="episodes[${epIndex}].doctor" required />
+          </div>
+        </div>
+
+        <fieldset>
+          <legend>Stages</legend>
+          <div class="stages"></div>
+          <button type="button" class="addStageBtn">+ Tambah Stage</button>
+        </fieldset>
+        <div style="text-align:right">
+          <button type="button" class="removeEpisodeBtn">Hapus Episode</button>
+        </div>
+      `;
+
+      const stagesContainer = episode.querySelector('.stages');
+      const addStageBtn = episode.querySelector('.addStageBtn');
+      addStageBtn.addEventListener('click', () => stagesContainer.appendChild(createStageElement(epIndex)));
+      episode.querySelector('.removeEpisodeBtn').addEventListener('click', () => episode.remove());
+
+      // Tambah satu stage awal untuk kenyamanan
+      stagesContainer.appendChild(createStageElement(epIndex));
+      return episode;
+    }
+
+    addEpisodeBtn.addEventListener('click', () => {
+      const epIndex = episodesContainer.querySelectorAll('.episode').length;
+      episodesContainer.appendChild(createEpisodeElement(epIndex));
+    });
+
+    // Buat satu episode awal
+    episodesContainer.appendChild(createEpisodeElement(0));
+
+    function serializeFormToPatient() {
+      const base = {
+        name: document.getElementById('name').value.trim(),
+        patientId: document.getElementById('patientId').value.trim(),
+        birthDate: document.getElementById('birthDate').value.trim(),
+        gender: document.getElementById('gender').value,
+        phone: document.getElementById('phone').value.trim(),
+        email: document.getElementById('email').value.trim() || undefined,
+        address: document.getElementById('address').value.trim() || undefined,
+      };
+
+      const ecName = document.getElementById('emergencyContactName').value.trim();
+      const ecPhone = document.getElementById('emergencyContactPhone').value.trim();
+      const ecRel = document.getElementById('emergencyContactRelationship').value.trim();
+      const emergencyContact = (ecName || ecPhone || ecRel)
+        ? { name: ecName, phone: ecPhone, relationship: ecRel }
+        : undefined;
+
+      const episodes = Array.from(episodesContainer.querySelectorAll('.episode')).map((episodeEl, epIndex) => {
+        const getInput = (name) => episodeEl.querySelector(`input[name="episodes[${epIndex}].${name}"]`);
+        const episodeId = getInput('episodeId').value.trim();
+        const date = getInput('date').value.trim();
+        const diagnosis = getInput('diagnosis').value.trim();
+        const doctor = getInput('doctor').value.trim();
+
+        const stages = Array.from(episodeEl.querySelectorAll('.stage')).map((stageEl) => {
+          const q = (sel) => stageEl.querySelector(sel);
+          const name = q(`input[name="episodes[${epIndex}].stages[].name"]`).value.trim();
+          const date = q(`input[name="episodes[${epIndex}].stages[].date"]`).value.trim();
+          const time = q(`input[name="episodes[${epIndex}].stages[].time"]`).value.trim();
+          const ward = q(`input[name="episodes[${epIndex}].stages[].ward"]`).value.trim();
+          const status = q(`select[name="episodes[${epIndex}].stages[].status"]`).value;
+          const notesEl = q(`textarea[name="episodes[${epIndex}].stages[].notes"]`);
+          const notes = notesEl && notesEl.value.trim() ? notesEl.value.trim() : undefined;
+
+          const files = Array.from(stageEl.querySelectorAll('.file')).map((fileEl) => {
+            const fq = (name) => fileEl.querySelector(`input[name="episodes[${epIndex}].stages[].files[].${name}"]`);
+            const fileId = fq('fileId').value.trim();
+            const fileType = fq('fileType').value.trim();
+            const fileSize = fq('fileSize').value.trim();
+            const desc = fileEl.querySelector(`input[name="episodes[${epIndex}].stages[].files[].metadata.description"]`).value.trim();
+            const tagsRaw = fileEl.querySelector(`input[name="episodes[${epIndex}].stages[].files[].metadata.tags"]`).value.trim();
+            const uploadedBy = fileEl.querySelector(`input[name="episodes[${epIndex}].stages[].files[].metadata.uploadedBy"]`).value.trim();
+            const uploadInput = fileEl.querySelector('.fileUpload');
+            const uploadedFile = uploadInput && uploadInput.files && uploadInput.files[0];
+
+            const metadata = (desc || tagsRaw || uploadedBy)
+              ? {
+                  description: desc || undefined,
+                  tags: tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean) : undefined,
+                  uploadedBy: uploadedBy || undefined,
+                }
+              : undefined;
+
+            const fileObj = {
+              fileId,
+              fileType: fileType || undefined,
+              fileSize: fileSize || undefined,
+              metadata,
+            };
+            if (uploadedFile) {
+              fileObj.binaryData = {
+                // Placeholder; server should handle actual binary via upload endpoint
+                contentType: uploadedFile.type || undefined,
+                fileName: uploadedFile.name,
+                size: uploadedFile.size,
+              };
+            }
+            return fileObj;
+          });
+
+          return { name, date, time, ward, status, notes, files };
+        });
+
+        return {
+          episodeId,
+          date,
+          diagnosis,
+          doctor,
+          stages,
+        };
+      });
+
+      return {
+        ...base,
+        emergencyContact,
+        episodes,
+      };
+    }
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       message.textContent = '';
       message.className = '';
-
-      const formData = new FormData(form);
-      const payload = Object.fromEntries(formData.entries());
+      const payload = serializeFormToPatient();
 
       try {
         const res = await fetch('/patients', {
@@ -104,11 +467,13 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
-        const data = await res.json();
+        const data = await res.json().catch(() => ({}));
         if (res.ok) {
-          message.textContent = 'Berhasil menyimpan pasien: ' + data.patient.name;
+          message.textContent = 'Berhasil menyimpan pasien: ' + (data.patient?.name || payload.name);
           message.className = 'success';
           form.reset();
+          episodesContainer.innerHTML = '';
+          episodesContainer.appendChild(createEpisodeElement(0));
         } else {
           message.textContent = data.error || 'Gagal menyimpan data';
           message.className = 'error';
@@ -117,6 +482,18 @@
         message.textContent = err.message || 'Kesalahan jaringan';
         message.className = 'error';
       }
+    });
+  </script>
+  <script>
+    const root = document.documentElement;
+    const toggle = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme');
+    if (saved === 'dark') { root.classList.add('dark'); toggle.textContent = 'Tema: Gelap'; }
+    toggle.addEventListener('click', () => {
+      root.classList.toggle('dark');
+      const isDark = root.classList.contains('dark');
+      toggle.textContent = isDark ? 'Tema: Gelap' : 'Tema: Cerah';
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
     });
   </script>
 </body>
