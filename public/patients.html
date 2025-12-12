@@ -77,6 +77,12 @@
     </div>
   </div>
   <script>
+    function formatFileSize(bytes) {
+      if (!bytes) return '';
+      const kb = Math.round(bytes / 1024);
+      return kb.toLocaleString('id-ID') + ' KB';
+    }
+    
     async function loadPatients(){
       const res = await fetch('/patients?limit=100');
       const data = await res.json();
@@ -118,10 +124,12 @@
               fileEl.className='file';
               const viewUrl = f.fileId ? `/file-viewer?patientId=${p.patientId}&episodeId=${ep.episodeId}&stageId=${st.id||''}&fileId=${f.fileId}&fileName=${encodeURIComponent(f.binaryData?.fileName||f.fileId)}&contentType=${encodeURIComponent(f.binaryData?.contentType||'')}` : '#';
               const downloadUrl = f.fileId ? `/patients/${p.patientId}/episodes/${ep.episodeId}/stages/${st.id||''}/files/${f.fileId}/download` : '#';
+              const downloadFileName = f.binaryData?.fileName || f.fileId;
+              const formattedSize = formatFileSize(f.binaryData?.size);
               fileEl.innerHTML = `
                 <div><strong>File:</strong> ${f.fileId} <span class="small">${(f.metadata?.description)||''}</span></div>
-                <div class="small">${(f.binaryData?.fileName)||''} • ${(f.binaryData?.contentType)||''} • ${(f.binaryData?.size)||''}</div>
-                <div class="small"><a href="${viewUrl}">Lihat</a> • <a href="${downloadUrl}" target="_blank">Unduh</a></div>
+                <div class="small">${(f.binaryData?.fileName)||''} • ${(f.binaryData?.contentType)||''} • ${formattedSize}</div>
+                <div class="small"><a href="${viewUrl}">Lihat</a> • <a href="${downloadUrl}" download="${downloadFileName}" target="_blank">Unduh</a></div>
               `;
               files.appendChild(fileEl);
             });

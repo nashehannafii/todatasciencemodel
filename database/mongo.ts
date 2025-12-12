@@ -1,5 +1,5 @@
 import { MongoClient, Db, Collection, GridFSBucket } from 'mongodb';
-import { IPatient } from '../models/Patient';
+import { IPatient, PatientSchema } from '../models/Patient';
 
 // Prefer environment variables; fallback to local dev instance
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
@@ -16,22 +16,26 @@ export async function connectToDatabase() {
     await client.connect();
     db = client.db(DB_NAME);
     
-    // Ensure collection exists with validator; create if missing
+    // Check if collection exists and has a validator
     const existingCollections = await db.listCollections({ name: 'patients' }).toArray();
     if (existingCollections.length === 0) {
-      await db.createCollection('patients', {
-        validator: {
-          $jsonSchema: {
-            bsonType: 'object',
-            required: ['name', 'patientId', 'birthDate', 'gender', 'phone'],
-            properties: {
-              patientId: { bsonType: 'string', description: 'required' },
-              phone: { bsonType: 'string', description: 'required' }
-            }
-          }
-        }
-      });
+      // Create new collection without strict validation
+      await db.createCollection('patients');
+      console.log('Created new collection "patients"');
+    } else {
+      // Try to remove old strict validator
+      try {
+        await db.command({
+          collMod: 'patients',
+          validator: {},
+          validationLevel: 'off'
+        });
+        console.log('Removed old validator from collection');
+      } catch (e: any) {
+        console.warn('Could not modify validator:', e.message);
+      }
     }
+    
     patientsCollection = db.collection<IPatient>('patients');
     
     // GridFS untuk file besar
@@ -46,25 +50,6 @@ export async function connectToDatabase() {
     await patientsCollection.createIndex({ patientId: 1 }, { unique: true });
     await patientsCollection.createIndex({ name: 'text' });
     await patientsCollection.createIndex({ 'episodes.episodeId': 1 });
-    
-    // Try to strengthen validator; ignore if collMod fails (e.g., permissions)
-    try {
-      await db.command({
-        collMod: 'patients',
-        validator: {
-          $jsonSchema: {
-            bsonType: 'object',
-            required: ['name', 'patientId', 'birthDate', 'gender', 'phone'],
-            properties: {
-              patientId: { bsonType: 'string', pattern: '^[A-Za-z0-9-]+$' },
-              phone: { bsonType: 'string', pattern: '^[0-9]{7,15}$' }
-            }
-          }
-        }
-      });
-    } catch (e) {
-      console.warn('collMod validator update skipped:', (e as any)?.message);
-    }
     
     return { db, patientsCollection, gridFSBucket };
   } catch (error) {

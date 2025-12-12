@@ -111,7 +111,15 @@ export class PatientController {
             stages.push({ ...st, files });
           }
 
-          result.push({ ...ep, stages });
+          // Ensure createdAt and updatedAt are present
+          const episode = { ...ep, stages };
+          if (!episode.createdAt) {
+            episode.createdAt = new Date();
+          }
+          if (!episode.updatedAt) {
+            episode.updatedAt = new Date();
+          }
+          result.push(episode);
         }
 
         return result;
@@ -122,6 +130,10 @@ export class PatientController {
         patientId: payload.patientId,
         birthDate: payload.birthDate,
         gender: payload.gender,
+        phone: payload.phone,
+        email: payload.email,
+        address: payload.address,
+        emergencyContact: payload.emergencyContact,
         episodes: await normalizeEpisodes(payload.episodes || [])
       };
 

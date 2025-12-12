@@ -251,24 +251,47 @@ export class PatientService {
     const collection = getPatientsCollection();
     
     const now = new Date();
-    const result = await collection.insertOne({
-      _id: new ObjectId(),
-      ...patientData,
-      episodes: patientData.episodes?.map(ep => ({
+    
+    // Convert episodes with proper date handling
+    const episodes = (patientData.episodes || []).map(ep => {
+      const episodeCreated = ep.createdAt ? new Date(ep.createdAt) : now;
+      const episodeUpdated = ep.updatedAt ? new Date(ep.updatedAt) : now;
+      
+      return {
         ...ep,
-        createdAt: now,
-        updatedAt: now,
-        stages: ep.stages?.map(st => ({
+        createdAt: episodeCreated,
+        updatedAt: episodeUpdated,
+        stages: (ep.stages || []).map(st => ({
           ...st,
           id: st.id || new ObjectId().toHexString(),
           files: st.files || []
-        })) || []
-      })) || [],
-      createdAt: now,
-      updatedAt: now
+        }))
+      };
     });
     
-    return { _id: result.insertedId, ...patientData, createdAt: now, updatedAt: now };
+    const doc = {
+      _id: new ObjectId(),
+      ...patientData,
+      episodes,
+      createdAt: now,
+      updatedAt: now
+    };
+    
+    try {
+      const result = await collection.insertOne(doc as any);
+      return { _id: result.insertedId, ...patientData, episodes: doc.episodes, createdAt: now, updatedAt: now };
+    } catch (err: any) {
+      console.error('Insert error details:', JSON.stringify({
+        code: err.code,
+        message: err.message,
+        errInfo: err.errInfo,
+        doc: {
+          episodes: doc.episodes.length,
+          episodeKeys: doc.episodes[0] ? Object.keys(doc.episodes[0]) : []
+        }
+      }, null, 2));
+      throw err;
+    }
   }
 
   // ... methods lainnya tetap seperti sebelumnya

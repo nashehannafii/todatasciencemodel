@@ -102,7 +102,7 @@ export class FileService {
       fileName: filename,
       size: buffer.length,
       uploadDate: new Date(),
-      base64: base64String || undefined
+      // base64: base64String || undefined
     };
   }
 
