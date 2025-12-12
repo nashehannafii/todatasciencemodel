@@ -260,6 +260,7 @@ export class PatientService {
         updatedAt: now,
         stages: ep.stages?.map(st => ({
           ...st,
+          id: st.id || new ObjectId().toHexString(),
           files: st.files || []
         })) || []
       })) || [],

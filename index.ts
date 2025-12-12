@@ -30,6 +30,11 @@ const server = serve({
       const html = await Bun.file('public/patient-detail.html').text();
       return new Response(html, { headers: { 'Content-Type': 'text/html' } });
     }
+    // File viewer page
+    if (req.method === 'GET' && url.pathname === '/file-viewer') {
+      const html = await Bun.file('public/file-viewer.html').text();
+      return new Response(html, { headers: { 'Content-Type': 'text/html' } });
+    }
     // Serve static assets under /public
     if (req.method === 'GET' && url.pathname.startsWith('/public/')) {
       const filePath = url.pathname.slice(1); // remove leading /

@@ -68,7 +68,32 @@ export class PatientController {
         payload = text ? JSON.parse(text) : {};
       }
 
-      // Basic shape normalization from form fields
+      // Normalize episodes and inline base64 file data if present
+      const normalizeEpisodes = (episodes: any[] = []) => {
+        return episodes.map(ep => ({
+          ...ep,
+          stages: (ep.stages || []).map((st: any) => ({
+            ...st,
+            files: (st.files || []).map((f: any) => {
+              // Handle base64 payload: binaryData.data (base64 string) -> Binary
+              if (f?.binaryData?.data && typeof f.binaryData.data === 'string') {
+                try {
+                  const buf = Buffer.from(f.binaryData.data, 'base64');
+                  f.binaryData = await fileService.createBinaryData(
+                    buf,
+                    f.binaryData.contentType || f.fileType || 'application/octet-stream',
+                    f.binaryData.fileName || f.fileId || 'file'
+                  );
+                } catch (e) {
+                  console.error('Failed to decode base64 file', e);
+                }
+              }
+              return f;
+            })
+          }))
+        }));
+      };
+
       const patientData = {
         name: payload.name,
         patientId: payload.patientId,
@@ -82,7 +107,7 @@ export class PatientController {
           phone: payload.emergencyContactPhone,
           relationship: payload.emergencyContactRelationship
         } : undefined,
-        episodes: []
+        episodes: await normalizeEpisodes(payload.episodes || [])
       } as any;
 
       const created = await patientService.createPatient(patientData);

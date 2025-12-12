@@ -39,10 +39,9 @@
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
       margin: 0; background: var(--bg); color: var(--text);
-      min-height: 100vh; display: flex; align-items: flex-start; justify-content: center;
-      line-height: 1.6;
+      min-height: 100vh; line-height: 1.6;
     }
-    .container { width: 100%; max-width: 820px; padding: 40px 24px; }
+    .container { width: 100%; max-width: 820px; padding: 40px 24px; margin: 24px auto; }
     .header {
       display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;
     }
@@ -55,6 +54,16 @@
       border: 1px solid var(--border);
     }
     .toggle:hover { background: var(--accent); color: white; border-color: var(--accent); }
+    .navbar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 16px 24px; background: var(--card); border-bottom: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      position: sticky; top: 0; z-index: 10;
+    }
+    .brand { font-weight: 700; letter-spacing: -0.01em; }
+    .menu { display: flex; gap: 14px; align-items: center; }
+    .menu a { color: var(--text); text-decoration: none; font-weight: 500; font-size: 14px; }
+    .menu a:hover { color: var(--accent-hover); }
     .card {
       background: var(--card); border: 1px solid var(--border);
       border-radius: 12px; padding: 32px; box-shadow: var(--shadow-lg);
@@ -96,10 +105,18 @@
   </style>
 </head>
 <body>
+  <header class="navbar">
+    <div class="brand">Patient Data</div>
+    <nav class="menu">
+      <a href="/">Beranda</a>
+      <a href="/patient-form">Input Pasien</a>
+      <a href="/patients-view">Data Pasien</a>
+      <span id="themeToggle" class="toggle">Tema: Cerah</span>
+    </nav>
+  </header>
   <div class="container">
     <div class="header">
       <div class="title">Input Data Pasien</div>
-      <div class="nav"><a href="/">Beranda</a><span id="themeToggle" class="toggle">Tema: Cerah</span></div>
     </div>
     <div class="card">
     <p>Isi data pasien berikut dan klik Simpan.</p>
@@ -108,24 +125,24 @@
     <div class="row">
       <div>
         <label for="name">Nama</label>
-        <input id="name" name="name" required />
+        <input id="name" name="name" value="John Doe" required />
       </div>
       <div>
         <label for="patientId">ID Pasien</label>
-        <input id="patientId" name="patientId" required />
+        <input id="patientId" name="patientId" value="PAT001" required />
       </div>
     </div>
 
     <div class="row">
       <div>
         <label for="birthDate">Tanggal Lahir</label>
-        <input id="birthDate" name="birthDate" type="date" required />
+        <input id="birthDate" name="birthDate" type="date" value="1990-01-15" required />
       </div>
       <div>
         <label for="gender">Jenis Kelamin</label>
         <select id="gender" name="gender" required>
           <option value="">-- pilih --</option>
-          <option value="male">Pria</option>
+          <option value="male" selected>Pria</option>
           <option value="female">Wanita</option>
           <option value="other">Lainnya</option>
         </select>
@@ -135,17 +152,17 @@
     <div class="row">
       <div>
         <label for="phone">No. Telepon</label>
-        <input id="phone" name="phone" required />
+        <input id="phone" name="phone" value="081234567890" required />
       </div>
       <div>
         <label for="email">Email</label>
-        <input id="email" name="email" type="email" />
+        <input id="email" name="email" type="email" value="johndoe@email.com" />
       </div>
     </div>
 
     <div>
       <label for="address">Alamat</label>
-      <textarea id="address" name="address" rows="2"></textarea>
+      <textarea id="address" name="address" rows="2">Jl. Contoh No. 123, Jakarta</textarea>
     </div>
 
     <fieldset>
@@ -153,16 +170,16 @@
       <div class="row">
         <div>
           <label for="emergencyContactName">Nama</label>
-          <input id="emergencyContactName" name="emergencyContactName" />
+          <input id="emergencyContactName" name="emergencyContactName" value="Jane Doe" />
         </div>
         <div>
           <label for="emergencyContactPhone">Telepon</label>
-          <input id="emergencyContactPhone" name="emergencyContactPhone" />
+          <input id="emergencyContactPhone" name="emergencyContactPhone" value="081298765432" />
         </div>
       </div>
       <div>
         <label for="emergencyContactRelationship">Hubungan</label>
-        <input id="emergencyContactRelationship" name="emergencyContactRelationship" />
+        <input id="emergencyContactRelationship" name="emergencyContactRelationship" value="Istri" />
       </div>
     </fieldset>
 
@@ -199,21 +216,21 @@
         <div class="row">
           <div>
             <label>Nama Stage</label>
-            <input name="episodes[${epIndex}].stages[].name" required />
+            <input name="episodes[${epIndex}].stages[].name" value="Pemeriksaan Awal" required />
           </div>
           <div>
             <label>Tanggal (YYYY-MM-DD)</label>
-            <input name="episodes[${epIndex}].stages[].date" placeholder="2025-12-12" required />
+            <input name="episodes[${epIndex}].stages[].date" type="date" value="${new Date().toISOString().split('T')[0]}" required />
           </div>
         </div>
         <div class="row">
           <div>
             <label>Waktu (HH:MM)</label>
-            <input name="episodes[${epIndex}].stages[].time" placeholder="09:30" required />
+            <input name="episodes[${epIndex}].stages[].time" type="time" value="09:00" required />
           </div>
           <div>
             <label>Ruang Perawatan (Ward)</label>
-            <input name="episodes[${epIndex}].stages[].ward" required />
+            <input name="episodes[${epIndex}].stages[].ward" value="Ruang A1" required />
           </div>
         </div>
         <div>
@@ -221,7 +238,7 @@
           <select name="episodes[${epIndex}].stages[].status" required>
             <option value="">-- pilih --</option>
             <option value="pending">Pending</option>
-            <option value="in-progress">Dalam proses</option>
+            <option value="in-progress" selected>Dalam proses</option>
             <option value="completed">Selesai</option>
             <option value="cancelled">Dibatalkan</option>
           </select>
@@ -253,11 +270,11 @@
           <div class="row">
             <div>
               <label>File ID / Referensi</label>
-              <input name="episodes[${epIndex}].stages[].files[].fileId" required />
+              <input name="episodes[${epIndex}].stages[].files[].fileId" value="FILE${Date.now()}" required />
             </div>
             <div>
               <label>Jenis File (opsional)</label>
-              <input name="episodes[${epIndex}].stages[].files[].fileType" />
+              <input name="episodes[${epIndex}].stages[].files[].fileType" value="application/pdf" />
             </div>
           </div>
           <div>
@@ -268,21 +285,21 @@
           <div class="row">
             <div>
               <label>Ukuran (opsional)</label>
-              <input name="episodes[${epIndex}].stages[].files[].fileSize" />
+              <input name="episodes[${epIndex}].stages[].files[].fileSize" value="" />
             </div>
             <div>
               <label>Deskripsi (opsional)</label>
-              <input name="episodes[${epIndex}].stages[].files[].metadata.description" />
+              <input name="episodes[${epIndex}].stages[].files[].metadata.description" value="Hasil pemeriksaan" />
             </div>
           </div>
           <div class="row">
             <div>
               <label>Tag (koma dipisah, opsional)</label>
-              <input name="episodes[${epIndex}].stages[].files[].metadata.tags" placeholder="ct: lab, radiologi" />
+              <input name="episodes[${epIndex}].stages[].files[].metadata.tags" value="lab, hasil" />
             </div>
             <div>
               <label>Diunggah oleh (opsional)</label>
-              <input name="episodes[${epIndex}].stages[].files[].metadata.uploadedBy" />
+              <input name="episodes[${epIndex}].stages[].files[].metadata.uploadedBy" value="Admin" />
             </div>
           </div>
           <div style="text-align:right">
@@ -319,21 +336,21 @@
         <div class="row">
           <div>
             <label>Episode ID</label>
-            <input name="episodes[${epIndex}].episodeId" required />
+            <input name="episodes[${epIndex}].episodeId" value="EP${String(epIndex + 1).padStart(3, '0')}" required />
           </div>
           <div>
             <label>Tanggal (YYYY-MM-DD)</label>
-            <input name="episodes[${epIndex}].date" placeholder="2025-12-12" required />
+            <input name="episodes[${epIndex}].date" type="date" value="${new Date().toISOString().split('T')[0]}" required />
           </div>
         </div>
         <div class="row">
           <div>
             <label>Diagnosis</label>
-            <input name="episodes[${epIndex}].diagnosis" required />
+            <input name="episodes[${epIndex}].diagnosis" value="Pemeriksaan Rutin" required />
           </div>
           <div>
             <label>Dokter Penanggung Jawab</label>
-            <input name="episodes[${epIndex}].doctor" required />
+            <input name="episodes[${epIndex}].doctor" value="Dr. Ahmad Hidayat, Sp.PD" required />
           </div>
         </div>
 
