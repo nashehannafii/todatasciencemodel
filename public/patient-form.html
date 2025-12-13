@@ -443,7 +443,7 @@
           <div>
             <label>Unggah File (pdf, jpg, png, dcm)</label>
             <input type="file" class="fileUpload" accept=".pdf,.jpg,.jpeg,.png,.dcm" />
-            <small class="fileHint" style="color:#64748b">File akan dikonversi ke base64 dan disimpan ke database.</small>
+            <small class="fileHint" style="color:#64748b">File kecil (&lt;10MB) disimpan langsung. File besar (&gt;10MB) dipecah menjadi chunks dan disimpan di GridFS.</small>
           </div>
           <div class="row">
             <div>
@@ -612,6 +612,12 @@
                   // Convert file to base64 if uploaded
                   if (uploadedFile) {
                     try {
+                      // Check file size
+                      const fileSizeMB = uploadedFile.size / (1024 * 1024);
+                      if (fileSizeMB > 10) {
+                        console.log(`Large file detected: ${uploadedFile.name} (${fileSizeMB.toFixed(2)}MB). Will be stored in GridFS.`);
+                      }
+                      
                       const base64Data = await new Promise((resolve, reject) => {
                         const reader = new FileReader();
                         reader.onload = () => {
@@ -634,6 +640,7 @@
                       };
                     } catch (err) {
                       console.error('Error reading file:', err);
+                      alert(`Error membaca file ${uploadedFile.name}: ${err.message}`);
                     }
                   }
                   

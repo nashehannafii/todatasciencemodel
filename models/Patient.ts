@@ -2,7 +2,8 @@ import { ObjectId, Binary } from 'mongodb';
 
 // Interface untuk File Binary
 export interface IFileBinary {
-  data: Binary;
+  data?: Binary; // For small files stored as Binary
+  gridFSId?: string; // For large files stored in GridFS
   contentType: string;
   fileName: string;
   size: number;

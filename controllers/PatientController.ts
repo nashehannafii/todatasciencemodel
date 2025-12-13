@@ -85,15 +85,47 @@ export class PatientController {
 
               if (base64) {
                 try {
-                  const buffer = Buffer.from(base64, 'base64');
+                  // Estimate file size from base64
+                  const estimatedSize = (base64.length * 3) / 4;
+                  const maxDirectSize = 10 * 1024 * 1024; // 10MB
 
-                  f.binaryData = await fileService.createBinaryData(
-                    buffer,
-                    binary?.contentType || f.fileType || 'application/octet-stream',
-                    binary?.fileName || f.fileId || 'file'
-                  );
+                  // For files larger than 10MB, use GridFS instead of Binary
+                  if (estimatedSize > maxDirectSize) {
+                    console.log(`Large file detected (${Math.round(estimatedSize / 1024 / 1024)}MB), using GridFS for ${f.fileId}`);
+                    
+                    const gridFSId = await fileService.uploadFromBase64(
+                      base64,
+                      {
+                        filename: binary?.fileName || f.fileId || 'file',
+                        contentType: binary?.contentType || f.fileType || 'application/octet-stream',
+                        metadata: {
+                          fileId: f.fileId,
+                          description: f.metadata?.description
+                        }
+                      }
+                    );
 
-                  f.fileSize = buffer.length;
+                    // Store GridFS reference instead of binary data
+                    f.binaryData = {
+                      gridFSId: gridFSId.toString(),
+                      contentType: binary?.contentType || f.fileType || 'application/octet-stream',
+                      fileName: binary?.fileName || f.fileId || 'file',
+                      size: estimatedSize,
+                      uploadDate: new Date()
+                    };
+                    f.fileSize = estimatedSize;
+                  } else {
+                    // For smaller files, use chunked decoding to avoid memory issues
+                    const buffer = await fileService.base64ToBuffer(base64);
+
+                    f.binaryData = await fileService.createBinaryData(
+                      buffer,
+                      binary?.contentType || f.fileType || 'application/octet-stream',
+                      binary?.fileName || f.fileId || 'file'
+                    );
+
+                    f.fileSize = buffer.length;
+                  }
                 } catch (err: any) {
                   console.error(`Error processing file ${f.fileId}:`, err.message);
                   throw new Error(`Failed to process file ${f.fileId}: ${err.message}`);

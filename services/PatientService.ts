@@ -161,8 +161,8 @@ export class PatientService {
 
     if (!file) return null;
 
-    // Jika file tersimpan sebagai binary langsung
-    if (file.binaryData) {
+    // Jika file tersimpan sebagai binary langsung dengan data property
+    if (file.binaryData?.data) {
       return {
         buffer: this.fileService.binaryToBuffer(file.binaryData.data),
         contentType: file.binaryData.contentType,
@@ -170,7 +170,23 @@ export class PatientService {
       };
     }
 
-    // Jika file tersimpan di GridFS
+    // Jika file tersimpan di GridFS (new format with gridFSId)
+    if (file.binaryData?.gridFSId) {
+      const buffer = await this.fileService.downloadFileFromGridFS(
+        new ObjectId(file.binaryData.gridFSId)
+      );
+      const fileInfo = await this.fileService.getFileInfo(
+        new ObjectId(file.binaryData.gridFSId)
+      );
+
+      return {
+        buffer,
+        contentType: file.binaryData.contentType || fileInfo.contentType,
+        filename: file.binaryData.fileName || fileInfo.filename
+      };
+    }
+
+    // Jika file tersimpan di GridFS (old format with fileRef)
     if (file.fileRef) {
       const buffer = await this.fileService.downloadFileFromGridFS(
         new ObjectId(file.fileRef.fileId)
@@ -211,7 +227,14 @@ export class PatientService {
     const stage = episode?.stages.find(s => s.id === stageId);
     const file = stage?.files.find(f => f.fileId === fileId);
 
-    // Hapus dari GridFS jika ada
+    // Hapus dari GridFS jika ada (new format)
+    if (file?.binaryData?.gridFSId) {
+      await this.fileService.deleteFileFromGridFS(
+        new ObjectId(file.binaryData.gridFSId)
+      );
+    }
+
+    // Hapus dari GridFS jika ada (old format)
     if (file?.fileRef) {
       await this.fileService.deleteFileFromGridFS(
         new ObjectId(file.fileRef.fileId)
